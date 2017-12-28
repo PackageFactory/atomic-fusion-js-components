@@ -1,0 +1,4 @@
+PackageFactory:
+  AtomicFusion:
+    JsComponents:
+      enable: true

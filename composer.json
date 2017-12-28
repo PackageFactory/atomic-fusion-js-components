@@ -1,0 +1,18 @@
+{
+    "description": "Augment Fusion components to ease initialization with JavaScript",
+    "type": "neos-package",
+    "name": "packagefactory/atomicfusion-jscomponents",
+    "require": {
+        "neos/flow": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "PackageFactory\\AtomicFusion\\JsComponents\\": "Classes/"
+        }
+    },
+    "extra": {
+        "neos": {
+            "package-key": "PackageFactory.AtomicFusion.JsComponents"
+        }
+    }
+}
