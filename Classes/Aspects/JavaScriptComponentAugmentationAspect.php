@@ -20,70 +20,60 @@ class JavaScriptComponentAugmentationAspect
     protected $htmlAugmenter;
 
     /**
+     * @Flow\InjectConfiguration(path="tryFiles")
+     * @var array
+     */
+    protected $tryFiles;
+
+    /**
      * @Flow\Around("setting(PackageFactory.AtomicFusion.JsComponents.enable) && method(PackageFactory\AtomicFusion\FusionObjects\ComponentImplementation->evaluate())")
      * @Flow\Around("setting(PackageFactory.AtomicFusion.JsComponents.enable) && method(Neos\Fusion\FusionObjects\ComponentImplementation->evaluate())")
      * @param JoinPointInterface $joinPoint
-     * @return mixed
+     * @return string
      */
-    public function augmentComponentWithComponentInformation(JoinPointInterface $joinPoint)
+    public function augmentComponentWithComponentInformation(JoinPointInterface $joinPoint) : string
     {
         $componentImplementation = $joinPoint->getProxy();
-        $fusionObjectName = $this->getFusionObjectNameFromFusionObject($componentImplementation);
-        $packageName = $this->getPackageNameFromFusionObject($componentImplementation);
+        $fusionPrototypeName = $this->getFusionObjectNameFromFusionObject($componentImplementation);
         $renderedComponent = $joinPoint->getAdviceChain()->proceed($joinPoint);
 
-        list($packageName, $componentName) = explode(':', $fusionObjectName);
-        $componentNameSegements = explode('.', $componentName);
-        $componentPath = implode('/', $componentNameSegements);
-        $trailingComponentNameSegment = array_pop($componentNameSegements);
-
-        $javascriptFileCandidates = [
-            sprintf('resource://%s/Private/Fusion/%s/%s.js', $packageName, $componentPath, $trailingComponentNameSegment),
-            sprintf('resource://%s/Private/Fusion/%s/index.js', $packageName, $componentPath),
-            sprintf('resource://%s/Private/Fusion/%s/Index.js', $packageName, $componentPath),
-            sprintf('resource://%s/Private/Fusion/%s/component.js', $packageName, $componentPath),
-            sprintf('resource://%s/Private/Fusion/%s/Component.js', $packageName, $componentPath),
-            sprintf('resource://%s/Private/Fusion/%s.js', $packageName, $componentPath)
-        ];
-
-        $javascriptFileName = null;
-        foreach ($javascriptFileCandidates as $javascriptFileCandidate) {
-            if (file_exists($javascriptFileCandidate)) {
-                $javascriptFileName = $javascriptFileCandidate;
-                break;
-            }
-        }
-
-        if ($javascriptFileName) {
+        if ($javascriptFileName = $this->getJavaScriptFileNameFromFusionPrototypeName($fusionPrototypeName)) {
             return $this->htmlAugmenter->addAttributes(
                 $renderedComponent,
-                ['data-component' => $fusionObjectName]
+                ['data-component' => $fusionPrototypeName]
             );
         }
 
         return $renderedComponent;
     }
 
-    public function getFusionObjectNameFromFusionObject(AbstractFusionObject $fusionObject)
+    public function getJavaScriptFileNameFromFusionPrototypeName(string $fusionPrototypeName) : string
+    {
+        list($packageKey, $componentName) = explode(':', $fusionPrototypeName);
+        $fusionPrototypeNameSegments = explode('.', $componentName);
+        $componentPath = implode('/', $fusionPrototypeNameSegments);
+        $componentBaseName = array_pop($fusionPrototypeNameSegments);
+
+        foreach($this->tryFiles as $fileNamePattern) {
+            $fileName = $fileNamePattern;
+            $fileName = str_replace('{fusionPrototypeName}', $fusionPrototypeName, $fileName);
+            $fileName = str_replace('{packageKey}', $packageKey, $fileName);
+            $fileName = str_replace('{componentPath}', $componentPath, $fileName);
+            $fileName = str_replace('{componentBaseName}', $componentBaseName, $fileName);
+
+            if (file_exists($fileName)) {
+                return $fileName;
+            }
+        }
+
+        return '';
+    }
+
+    public function getFusionObjectNameFromFusionObject(AbstractFusionObject $fusionObject) : string
     {
         $fusionObjectReflection = new ClassReflection($fusionObject);
         $fusionObjectName = $fusionObjectReflection->getProperty('fusionObjectName')->getValue($fusionObject);
 
         return $fusionObjectName;
-    }
-
-    /**
-     * Get the package name for a given fusion object
-     *
-     * @param AbstractFusionObject $fusionObject
-     * @return string
-     */
-    public function getPackageNameFromFusionObject(AbstractFusionObject $fusionObject)
-    {
-        $fusionObjectName = $this->getFusionObjectNameFromFusionObject($fusionObject);
-
-        list($packageName) = explode(':', $fusionObjectName);
-
-        return $packageName;
     }
 }

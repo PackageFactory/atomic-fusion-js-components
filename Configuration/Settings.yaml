@@ -2,3 +2,10 @@ PackageFactory:
   AtomicFusion:
     JsComponents:
       enable: true
+      tryFiles:
+        - resource://{packageKey}/Private/Fusion/{componentPath}.js
+        - resource://{packageKey}/Private/Fusion/{componentPath}/{componentBaseName}.js
+        - resource://{packageKey}/Private/Fusion/{componentPath}/index.js
+        - resource://{packageKey}/Private/Fusion/{componentPath}/Index.js
+        - resource://{packageKey}/Private/Fusion/{componentPath}/component.js
+        - resource://{packageKey}/Private/Fusion/{componentPath}/Component.js
