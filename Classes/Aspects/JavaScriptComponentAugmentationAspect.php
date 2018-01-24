@@ -29,9 +29,9 @@ class JavaScriptComponentAugmentationAspect
      * @Flow\Around("setting(PackageFactory.AtomicFusion.JsComponents.enable) && method(PackageFactory\AtomicFusion\FusionObjects\ComponentImplementation->evaluate())")
      * @Flow\Around("setting(PackageFactory.AtomicFusion.JsComponents.enable) && method(Neos\Fusion\FusionObjects\ComponentImplementation->evaluate())")
      * @param JoinPointInterface $joinPoint
-     * @return string
+     * @return mixed
      */
-    public function augmentComponentWithComponentInformation(JoinPointInterface $joinPoint) : string
+    public function augmentComponentWithComponentInformation(JoinPointInterface $joinPoint)
     {
         $componentImplementation = $joinPoint->getProxy();
         $fusionPrototypeName = $this->getFusionObjectNameFromFusionObject($componentImplementation);
