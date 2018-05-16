@@ -2,8 +2,10 @@
     "description": "Augment Fusion components to ease initialization with JavaScript",
     "type": "neos-package",
     "name": "packagefactory/atomicfusion-jscomponents",
+    "license": "GPL-3.0",
     "require": {
-        "neos/flow": "*"
+        "neos/flow": "*",
+        "neos/fusion": "^4.0 || dev-master"
     },
     "autoload": {
         "psr-4": {

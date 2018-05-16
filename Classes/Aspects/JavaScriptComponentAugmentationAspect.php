@@ -5,7 +5,7 @@ use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Aop\JoinPointInterface;
 use Neos\Flow\Reflection\ClassReflection;
 use Neos\Fusion\FusionObjects\AbstractFusionObject;
-use Neos\Neos\Service\HtmlAugmenter;
+use Neos\Fusion\Service\HtmlAugmenter;
 
 /**
  * @Flow\Scope("singleton")
